@@ -8,7 +8,7 @@
 library(tidyr)
 library(dplyr)
 
-setwd("~/Desktop/fishsize_varpart/data/NorthSea/Oceanography/")
+setwd("~/Desktop/fishsize_varpart/data/NorthSea/IBTSsurvey/")
 rawdata <- read.csv("CPUE per length per subarea_2016-09-21_1965to2016_q1q3.csv",header = TRUE)
 targetSpecies <- c("Clupea harengus","Gadus morhua","Melanogrammus aeglefinus","Merlangius merlangus","Pleuronectes platessa","Pollachius virens","Scomber scombrus","Solea solea","Sprattus sprattus","Trisopterus esmarkii")
 
