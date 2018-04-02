@@ -294,20 +294,61 @@ postscript("output/Fig4_LMM_Temperature_FandT_naturalmortality_final.eps",width=
 multiplot(p5,p6,p7,p8,layout=out)
 dev.off()
 
-# GLMM for final model in multiple regression w/ stepwise backward elimination
-# (in progress)
-library(lmerTest)
-require(MuMIn)
-m <- lmer(Temperature~1+(1|Habitat),data=result,REML=FALSE) #reduced model
-m_allTemp <- lmer(Temperature~A50+L50+Linf+K+MeanF_M+cvF_M+MeanTemp+cvTemp+(1|Habitat),data=result,REML=FALSE)
-sTemp<-step(m_allTemp,type = 3,alpha.fixed = 0.05,reduce.fixed = TRUE,reduce.random = FALSE,lsmeans.calc = TRUE)
-anova(m,m_allTemp,sTemp$model) #model comparison between null, full and best model
-drop1(sTemp$model,test="Chisq") #significance test for individual variable in best model
-r.squaredGLMM(sTemp$model)
-m_final <- lmer(Temperature~cvF_M+MeanF_M+cvTemp+MeanTemp+(1|Habitat),data=result)
-anova(m_final)
+# Univariate linear regression on explained fraction of fishing/temperature v.s. Lifehist
+coefSig <- matrix(NA,4,8)
 
-m <- lmer(Fishing~1+(1|Habitat),data=result,REML = TRUE)
-m_allFishing <- lmer(Fishing~A50+L50+Linf+K+MeanF_M+cvF_M+MeanTemp+cvTemp+(1|Habitat),data=result,REML=FALSE)
-sFishing<-step(m_allFishing,type = 3,alpha.fixed = 0.05,reduce.fixed = TRUE,reduce.random = FALSE,lsmeans.calc = TRUE)
-anova(m,m_allFishing)
+#fishing
+m_A50 <- lm(Fishing~1+A50,data=result)
+coefSig[1,1] <- coef(m_A50)[2]
+coefSig[2,1] <- anova(m_A50)$`Pr(>F)`[1]
+m_L50 <- lm(Fishing~1+L50,data=result)
+coefSig[1,2] <- coef(m_L50)[2]
+coefSig[2,2] <- anova(m_L50)$`Pr(>F)`[1]
+m_Linf <- lm(Fishing~1+Linf,data=result)
+coefSig[1,3] <- coef(m_Linf)[2]
+coefSig[2,3] <- anova(m_Linf)$`Pr(>F)`[1]
+m_K <-lm(Fishing~1+K,data=result)
+coefSig[1,4] <- coef(m_K)[2]
+coefSig[2,4] <- anova(m_K)$`Pr(>F)`[1]
+m_MeanF_M <- lm(Fishing~1+MeanF_M,data=result)
+coefSig[1,5] <- coef(m_MeanF_M)[2]
+coefSig[2,5] <- anova(m_MeanF_M)$`Pr(>F)`[1]
+m_cvF_M <- lm(Fishing~1+cvF_M,data=result)
+coefSig[1,6] <- coef(m_cvF_M)[2]
+coefSig[2,6] <- anova(m_cvF_M)$`Pr(>F)`[1]
+m_meanTemp <- lm(Fishing~1+MeanTemp,data=result)
+coefSig[1,7] <- coef(m_meanTemp)[2]
+coefSig[2,7] <- anova(m_meanTemp)$`Pr(>F)`[1]
+m_cvTemp <- lm(Fishing~1+cvTemp,data=result)
+coefSig[1,8] <- coef(m_cvTemp)[2]
+coefSig[2,8] <- anova(m_cvTemp)$`Pr(>F)`[1]
+
+#temperature
+m_A50 <- lm(Temperature~1+A50,data=result)
+coefSig[3,1] <- coef(m_A50)[2]
+coefSig[4,1] <- anova(m_A50)$`Pr(>F)`[1]
+m_L50 <- lm(Temperature~1+L50,data=result)
+coefSig[3,2] <- coef(m_L50)[2]
+coefSig[4,2] <- anova(m_L50)$`Pr(>F)`[1]
+m_Linf <- lm(Temperature~1+Linf,data=result)
+coefSig[3,3] <- coef(m_Linf)[2]
+coefSig[4,3] <- anova(m_Linf)$`Pr(>F)`[1]
+m_K <-lm(Temperature~1+K,data=result)
+coefSig[3,4] <- coef(m_K)[2]
+coefSig[4,4] <- anova(m_K)$`Pr(>F)`[1]
+m_MeanF_M <- lm(Temperature~1+MeanF_M,data=result)
+coefSig[3,5] <- coef(m_MeanF_M)[2]
+coefSig[4,5] <- anova(m_MeanF_M)$`Pr(>F)`[1]
+m_cvF_M <- lm(Temperature~1+cvF_M,data=result)
+coefSig[3,6] <- coef(m_cvF_M)[2]
+coefSig[4,6] <- anova(m_cvF_M)$`Pr(>F)`[1]
+m_meanTemp <- lm(Temperature~1+MeanTemp,data=result)
+coefSig[3,7] <- coef(m_meanTemp)[2]
+coefSig[4,7] <- anova(m_meanTemp)$`Pr(>F)`[1]
+m_cvTemp <- lm(Temperature~1+cvTemp,data=result)
+coefSig[3,8] <- coef(m_cvTemp)[2]
+coefSig[4,8] <- anova(m_cvTemp)$`Pr(>F)`[1]
+
+coefSigOut <- data.frame(coefSig,row.names = c("coefF","sigF","coefT","sigT"))
+colnames(coefSigOut) <- c("A50","L50","Linf","K","MeanF_M","cvF_M","meanTemp","cvTemp")
+write.csv(coefSigOut,file = "output/Table3_fractionLMout.csv")
